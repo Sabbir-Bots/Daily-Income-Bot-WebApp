@@ -6,47 +6,22 @@
     <title>Dashboard</title>
     <style>
         /* স্টাইল কোড আগের মতোই আছে */
-        body {
-            font-family: sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            margin: 0;
-            padding: 15px;
-        }
-        .dashboard {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .balance {
-            font-size: 28px;
-            font-weight: bold;
-            color: #007bff;
-            margin: 10px 0;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-        }
-        .stat-item {
-            flex-basis: 45%;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
-        }
+        body { font-family: sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 15px; }
+        .dashboard { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; }
+        .balance { font-size: 28px; font-weight: bold; color: #007bff; margin: 10px 0; }
+        .stats { display: flex; justify-content: space-around; margin: 20px 0; }
+        .stat-item { flex-basis: 45%; background: #f8f9fa; padding: 10px; border-radius: 8px; }
         .stat-item h4 { margin: 0 0 5px 0; }
         .stat-item p { margin: 0; font-size: 20px; font-weight: bold; }
+        .loader { font-size: 18px; color: #888; }
     </style>
 </head>
 <body>
 
     <div class="dashboard">
-        <h2>স্বাগতম, <span id="user-name">...</span>!</h2>
+        <h2 id="welcome-message">লোড হচ্ছে...</h2>
         <p>আপনার বর্তমান ব্যালেন্স:</p>
-        <div class="balance">৳ <span id="user-balance">0</span></div>
+        <div class="balance">৳ <span id="user-balance" class="loader">...</span></div>
 
         <div class="stats">
             <div class="stat-item">
@@ -55,7 +30,7 @@
             </div>
             <div class="stat-item">
                 <h4>মোট রেফারেল</h4>
-                <p id="total-referrals">0</p>
+                <p id="total-referrals" class="loader">...</p>
             </div>
         </div>
 
@@ -66,25 +41,52 @@
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        // যখন ওয়েবপেজটি লোড হবে, এই কোডটি রান হবে
         document.addEventListener("DOMContentLoaded", function() {
             const tg = window.Telegram.WebApp;
+            tg.ready(); // টেলিগ্রামকে জানানো হচ্ছে যে অ্যাপটি প্রস্তুত
 
-            // টেলিগ্রাম থেকে ব্যবহারকারীর তথ্য নেওয়া হচ্ছে
-            const user = tg.initDataUnsafe.user;
+            // Python বট-এর API সার্ভারের URL
+            // এই URL টি আপনার Pydroid-এ চলমান বট সার্ভারের দিকে নির্দেশ করে
+            const API_URL = "https://korea-soccer-renaissance-beats.trycloudflare.com";
 
-            if (user) {
-                // 'user-name' লেখা জায়গাটিতে ব্যবহারকারীর নাম দেখানো হচ্ছে
-                const userNameSpan = document.getElementById('user-name');
-                userNameSpan.innerText = user.first_name;
-            } else {
-                document.getElementById('user-name').innerText = "Guest";
+            // Python বট থেকে ব্যবহারকারীর তথ্য আনার জন্য একটি ফাংশন
+            async function fetchUserData() {
+                try {
+                    // আমাদের Python API-কে অনুরোধ পাঠানো হচ্ছে
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: tg.initData // টেলিগ্রামের দেওয়া সিকিওর ডেটা পাঠানো হচ্ছে
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+                    
+                    // পাওয়া তথ্য দিয়ে ড্যাশবোর্ড আপডেট করা হচ্ছে
+                    document.getElementById('welcome-message').innerText = `স্বাগতম, ${data.full_name}!`;
+                    document.getElementById('user-balance').innerText = data.balance;
+                    document.getElementById('total-referrals').innerText = data.referrals;
+                    
+                    // রেফারেল লিঙ্ক তৈরি করা (আমরা পরে এটি সম্পূর্ণ করবো)
+                    const botUsername = "Daily_Income_Official_bot"; // আপনার বটের ইউজারনেম
+                    const userId = tg.initDataUnsafe.user.id;
+                    document.getElementById('referral-link').value = `https://t.me/${botUsername}?start=${userId}`;
+
+                } catch (error) {
+                    console.error('Failed to fetch user data:', error);
+                    document.getElementById('welcome-message').innerText = "ডেটা লোড করা যায়নি।";
+                }
             }
-
-            // আপাতত ব্যালেন্স এবং রেফারেল লিঙ্ক লোড করার কাজ বাকি আছে
-            // আমরা পরবর্তী ধাপে এটি করবো
+            
+            // ফাংশনটি কল করা হচ্ছে
+            fetchUserData();
         });
     </script>
-
+    
 </body>
 </html>
