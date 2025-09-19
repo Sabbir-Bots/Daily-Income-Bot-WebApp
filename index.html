@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* স্টাইল কোড আগের মতোই আছে */
+        body {
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
+        .dashboard {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .balance {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .stat-item {
+            flex-basis: 45%;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .stat-item h4 { margin: 0 0 5px 0; }
+        .stat-item p { margin: 0; font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <h2>স্বাগতম, <span id="user-name">...</span>!</h2>
+        <p>আপনার বর্তমান ব্যালেন্স:</p>
+        <div class="balance">৳ <span id="user-balance">0</span></div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <h4>দৈনিক কাজ সম্পন্ন</h4>
+                <p id="daily-tasks">0 / 10</p>
+            </div>
+            <div class="stat-item">
+                <h4>মোট রেফারেল</h4>
+                <p id="total-referrals">0</p>
+            </div>
+        </div>
+
+        <h4>আপনার রেফারেল লিঙ্ক</h4>
+        <p>আপনার বন্ধুদের রেফার করে আয় করুন!</p>
+        <input type="text" id="referral-link" value="লিঙ্ক লোড হচ্ছে..." readonly style="width: 90%; padding: 8px; border-radius: 5px; border: 1px solid #ccc; text-align: center;">
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        // যখন ওয়েবপেজটি লোড হবে, এই কোডটি রান হবে
+        document.addEventListener("DOMContentLoaded", function() {
+            const tg = window.Telegram.WebApp;
+
+            // টেলিগ্রাম থেকে ব্যবহারকারীর তথ্য নেওয়া হচ্ছে
+            const user = tg.initDataUnsafe.user;
+
+            if (user) {
+                // 'user-name' লেখা জায়গাটিতে ব্যবহারকারীর নাম দেখানো হচ্ছে
+                const userNameSpan = document.getElementById('user-name');
+                userNameSpan.innerText = user.first_name;
+            } else {
+                document.getElementById('user-name').innerText = "Guest";
+            }
+
+            // আপাতত ব্যালেন্স এবং রেফারেল লিঙ্ক লোড করার কাজ বাকি আছে
+            // আমরা পরবর্তী ধাপে এটি করবো
+        });
+    </script>
+
+</body>
+</html>
